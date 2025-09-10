@@ -15,8 +15,8 @@ app.use(express.json());
 app.use(cors());
 
 // Hardcoded username and password
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync("123", 10); // Hash your password
+const ADMIN_USERNAME = "jahandb";
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync("db123", 10); // Hash your password
 
 // Multer Storage for File Uploads
 const storage = multer.memoryStorage();
