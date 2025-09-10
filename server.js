@@ -56,11 +56,19 @@ app.get("/api/dashboard", (req, res) => {
 });
 
 // MySQL Database Connection
-const db = mysql.createConnection({
-  host: process.env.DB_HOST || "localhost", // for cPanel, MySQL host is usually 'localhost'
-  user: process.env.DB_USER || "root", // the user you created
-  password: process.env.DB_PASSWORD || "", // the password you set in cPanel
-  database: process.env.DB_NAME || "bachelor_admission", // your database name
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT, // <-- Aiven requires port (usually not 3306)
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync(path.resolve("ca.pem")),
+  },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
 db.connect((err) => {
