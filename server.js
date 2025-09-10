@@ -71,13 +71,14 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
-db.connect((err) => {
+db.query("SELECT 1", (err, results) => {
   if (err) {
     console.error("Database Connection Failed:", err);
   } else {
     console.log("Connected to MySQL Database");
   }
 });
+
 app.use("/uploads", express.static("uploads"));
 
 // Route: Get All Students
