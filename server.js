@@ -5,7 +5,7 @@ const path = require("path");
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const mysql = require("mysql");
+const mysql = require("mysql2"); // use mysql2 not mysql
 const fs = require("fs");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -58,24 +58,25 @@ app.get("/api/dashboard", (req, res) => {
 // MySQL Database Connection
 const db = mysql.createPool({
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT, // <-- Aiven requires port (usually not 3306)
+  port: process.env.DB_PORT, // Aiven gives a custom port
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: {
-    rejectUnauthorized: true,
-    ca: fs.readFileSync(path.resolve("ca.pem")),
+    ca: fs.readFileSync(path.resolve("ca.pem")), // Aiven CA certificate
   },
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
 
-db.query("SELECT 1", (err, results) => {
+// Test Connection
+db.getConnection((err, connection) => {
   if (err) {
-    console.error("Database Connection Failed:", err);
+    console.error("Database Connection Failed:", err.message);
   } else {
-    console.log("Connected to MySQL Database");
+    console.log("✅ Connected to MySQL Database");
+    connection.release();
   }
 });
 
