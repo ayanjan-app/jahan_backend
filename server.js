@@ -7,6 +7,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mysql = require("mysql");
 const fs = require("fs");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -55,10 +57,10 @@ app.get("/api/dashboard", (req, res) => {
 
 // MySQL Database Connection
 const db = mysql.createConnection({
-  host: "localhost", // for cPanel, MySQL host is usually 'localhost'
-  user: "", // the user you created
-  password: "", // the password you set in cPanel
-  database: "bachelor_admission", // your database name
+  host: process.env.DB_HOST || "localhost", // for cPanel, MySQL host is usually 'localhost'
+  user: process.env.DB_USER || "root", // the user you created
+  password: process.env.DB_PASSWORD || "", // the password you set in cPanel
+  database: process.env.DB_NAME || "bachelor_admission", // your database name
 });
 
 db.connect((err) => {
@@ -277,7 +279,6 @@ app.delete("/api/news/:id", (req, res) => {
   });
 });
 
-
 // Endpoint to add a new policy
 app.post("/api/policies", upload.single("pdf_file"), async (req, res) => {
   const { title, description, date, status } = req.body;
@@ -322,7 +323,8 @@ app.post("/api/policies", upload.single("pdf_file"), async (req, res) => {
 // Get all policies
 // Get list of policies (without PDF data)
 app.get("/api/policies", (req, res) => {
-  const query = "SELECT id, title, description, date, status FROM academic_policies ORDER BY date DESC";
+  const query =
+    "SELECT id, title, description, date, status FROM academic_policies ORDER BY date DESC";
   db.query(query, (err, results) => {
     if (err) {
       console.error("Error fetching policies:", err);
@@ -337,7 +339,7 @@ app.get("/api/policies", (req, res) => {
 app.get("/api/policies/pdf/:id", (req, res) => {
   const { id } = req.params;
   const query = "SELECT pdf_file FROM academic_policies WHERE id = ?";
-  
+
   db.query(query, [id], (err, results) => {
     if (err) {
       console.error("Error fetching PDF:", err);
@@ -351,12 +353,11 @@ app.get("/api/policies/pdf/:id", (req, res) => {
     const pdfData = results[0].pdf_file;
 
     // Set headers for PDF file download/view
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename=policy_${id}.pdf`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename=policy_${id}.pdf`);
     res.send(pdfData); // Send PDF blob directly
   });
 });
-
 
 // Delete a policy by ID
 app.delete("/api/policies/:id", (req, res) => {
@@ -377,7 +378,6 @@ app.delete("/api/policies/:id", (req, res) => {
     res.json({ message: "Policy deleted successfully" });
   });
 });
-
 
 // Get all jobs (for counting jobs)
 app.get("/api/jobs", (req, res) => {
